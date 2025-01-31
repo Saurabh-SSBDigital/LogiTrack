@@ -305,118 +305,20 @@ export default function AdminShipments() {
   const [gotoPage, setGotoPage] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // const downloadPDF = () => {
-  //   const doc = new jsPDF({ orientation: "landscape" });
-  //   const reportDate = format(new Date(), "PPP");
-
-  //   // 📄 HEADER SECTION
-  //   doc.setFont("helvetica", "bold");
-  //   doc.setFontSize(22);
-  //   doc.text("Shipment Report", 140, 15, { align: "center" });
-
-  //   doc.setFontSize(12);
-  //   doc.setFont("helvetica", "normal");
-  //   doc.text(`Date of Report: ${reportDate}`, 15, 25);
-  //   let yPosition = 35;
-
-  //   // 🎯 FILTERS SECTION
-  //   if (
-  //     startDate ||
-  //     endDate ||
-  //     search ||
-  //     selectedUsers.length ||
-  //     selectedSender ||
-  //     selectedFrom ||
-  //     selectedTo
-  //   ) {
-  //     doc.setFont("helvetica", "bold");
-  //     doc.setFontSize(14);
-  //     doc.text("Applied Filters:", 15, yPosition);
-  //     yPosition += 8;
-
-  //     doc.setFontSize(12);
-  //     doc.setFont("helvetica", "normal");
-
-  //     if (startDate && endDate) {
-  //       doc.text(`Date Range: ${startDate} → ${endDate}`, 20, yPosition);
-  //       yPosition += 7;
-  //     }
-  //     if (search) {
-  //       doc.text(`Search Query: ${search}`, 20, yPosition);
-  //       yPosition += 7;
-  //     }
-  //     if (selectedUsers.length) {
-  //       doc.text(
-  //         `Users: ${selectedUsers
-  //           .map((u) => `${u.first_name} ${u.last_name}`)
-  //           .join(", ")}`,
-  //         20,
-  //         yPosition
-  //       );
-  //       yPosition += 7;
-  //     }
-  //     if (selectedSender) {
-  //       doc.text(`Sender: ${selectedSender}`, 20, yPosition);
-  //       yPosition += 7;
-  //     }
-  //     if (selectedFrom) {
-  //       doc.text(`From: ${selectedFrom}`, 20, yPosition);
-  //       yPosition += 7;
-  //     }
-  //     if (selectedTo) {
-  //       doc.text(`To: ${selectedTo}`, 20, yPosition);
-  //       yPosition += 7;
-  //     }
-
-  //     yPosition += 5;
-  //   }
-
-  //   // 📊 TABLE HEADERS (Image Column Removed)
-  //   const tableColumnHeaders = [
-  //     "Package ID",
-  //     "User",
-  //     "Sender",
-  //     "From",
-  //     "To",
-  //     "Date",
-  //   ];
-  //   const tableRows = shipments.map((shipment) => [
-  //     shipment.package_id,
-  //     `${shipment.profiles?.first_name} ${shipment.profiles?.last_name}`,
-  //     shipment.sender_name,
-  //     shipment.from_address,
-  //     shipment.to_address,
-  //     format(new Date(shipment.created_at), "PPP"),
-  //   ]);
-
-  //   // 🏗️ Render Table
-  //   doc.autoTable({
-  //     startY: yPosition,
-  //     head: [tableColumnHeaders],
-  //     body: tableRows,
-  //     theme: "striped",
-  //     headStyles: { fillColor: [22, 38, 74], textColor: [255, 255, 255] }, // Dark blue header with white text
-  //     alternateRowStyles: { fillColor: [240, 240, 240] },
-  //     margin: { top: 10 },
-  //   });
-
-  //   doc.save(`Shipment_Report_${reportDate}.pdf`);
-  // };
-
   const downloadPDF = () => {
     const doc = new jsPDF({ orientation: "landscape" });
     const reportDate = format(new Date(), "PPP");
-  
+
     // 📄 HEADER SECTION
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.text("Shipment Report", 140, 15, { align: "center" });
-  
+
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     doc.text(`Date of Report: ${reportDate}`, 15, 25);
     let yPosition = 35;
-  
+
     // 🎯 FILTERS SECTION
     if (
       startDate ||
@@ -431,10 +333,10 @@ export default function AdminShipments() {
       doc.setFontSize(14);
       doc.text("Applied Filters:", 15, yPosition);
       yPosition += 8;
-  
+
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
-  
+
       if (startDate && endDate) {
         doc.text(`Date Range: ${startDate} → ${endDate}`, 20, yPosition);
         yPosition += 7;
@@ -465,11 +367,11 @@ export default function AdminShipments() {
         doc.text(`To: ${selectedTo}`, 20, yPosition);
         yPosition += 7;
       }
-  
+
       yPosition += 5;
     }
-  
-    // 📊 TABLE HEADERS
+
+    // 📊 TABLE HEADERS (Image Column Removed)
     const tableColumnHeaders = [
       "Package ID",
       "User",
@@ -477,6 +379,7 @@ export default function AdminShipments() {
       "From",
       "To",
       "Date",
+      "Note",
     ];
     const tableRows = shipments.map((shipment) => [
       shipment.package_id,
@@ -485,37 +388,146 @@ export default function AdminShipments() {
       shipment.from_address,
       shipment.to_address,
       format(new Date(shipment.created_at), "PPP"),
+      shipment.note,
     ]);
-  
-    // 🏗️ Render Table
+
+    // 🏗️ Render Table with Custom Column Widths
     doc.autoTable({
       startY: yPosition,
       head: [tableColumnHeaders],
       body: tableRows,
       theme: "striped",
-      headStyles: { fillColor: [22, 38, 74], textColor: [255, 255, 255] },
+      headStyles: { fillColor: [22, 38, 74], textColor: [255, 255, 255] }, // Dark blue header with white text
       alternateRowStyles: { fillColor: [240, 240, 240] },
       margin: { top: 10 },
+      columnStyles: {
+        0: { cellWidth: 35 },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 35 },
+        3: { cellWidth: 40 },
+        4: { cellWidth: 40 },
+        5: { cellWidth: 35 },
+        6: { cellWidth: 50 }, // Increases width for the "Note" column (index 6)
+      },
     });
-  
-    // ✅ Convert PDF to Blob
-    const pdfBlob = doc.output("blob");
 
-    // ✅ Convert Blob to File URL (WebView-Safe)
-    const file = new File([pdfBlob], `Shipment_Report_${reportDate}.pdf`, { type: "application/pdf" });
-    const fileURL = URL.createObjectURL(file);
-
-    // ✅ Create Hidden <a> Tag to Trigger Download
-    const link = document.createElement("a");
-    link.href = fileURL;
-    link.download = `Shipment_Report_${reportDate}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-
-    // ✅ Cleanup
-    document.body.removeChild(link);
-    URL.revokeObjectURL(fileURL);
+    doc.save(`Shipment_Report_${reportDate}.pdf`);
 };
+
+
+//   const downloadPDF = () => {
+//     const doc = new jsPDF({ orientation: "landscape" });
+//     const reportDate = format(new Date(), "PPP");
+  
+//     // 📄 HEADER SECTION
+//     doc.setFont("helvetica", "bold");
+//     doc.setFontSize(22);
+//     doc.text("Shipment Report", 140, 15, { align: "center" });
+  
+//     doc.setFontSize(12);
+//     doc.setFont("helvetica", "normal");
+//     doc.text(`Date of Report: ${reportDate}`, 15, 25);
+//     let yPosition = 35;
+  
+//     // 🎯 FILTERS SECTION
+//     if (
+//       startDate ||
+//       endDate ||
+//       search ||
+//       selectedUsers.length ||
+//       selectedSender ||
+//       selectedFrom ||
+//       selectedTo
+//     ) {
+//       doc.setFont("helvetica", "bold");
+//       doc.setFontSize(14);
+//       doc.text("Applied Filters:", 15, yPosition);
+//       yPosition += 8;
+  
+//       doc.setFontSize(12);
+//       doc.setFont("helvetica", "normal");
+  
+//       if (startDate && endDate) {
+//         doc.text(`Date Range: ${startDate} → ${endDate}`, 20, yPosition);
+//         yPosition += 7;
+//       }
+//       if (search) {
+//         doc.text(`Search Query: ${search}`, 20, yPosition);
+//         yPosition += 7;
+//       }
+//       if (selectedUsers.length) {
+//         doc.text(
+//           `Users: ${selectedUsers
+//             .map((u) => `${u.first_name} ${u.last_name}`)
+//             .join(", ")}`,
+//           20,
+//           yPosition
+//         );
+//         yPosition += 7;
+//       }
+//       if (selectedSender) {
+//         doc.text(`Sender: ${selectedSender}`, 20, yPosition);
+//         yPosition += 7;
+//       }
+//       if (selectedFrom) {
+//         doc.text(`From: ${selectedFrom}`, 20, yPosition);
+//         yPosition += 7;
+//       }
+//       if (selectedTo) {
+//         doc.text(`To: ${selectedTo}`, 20, yPosition);
+//         yPosition += 7;
+//       }
+  
+//       yPosition += 5;
+//     }
+  
+//     // 📊 TABLE HEADERS
+//     const tableColumnHeaders = [
+//       "Package ID",
+//       "User",
+//       "Sender",
+//       "From",
+//       "To",
+//       "Date",
+//     ];
+//     const tableRows = shipments.map((shipment) => [
+//       shipment.package_id,
+//       `${shipment.profiles?.first_name} ${shipment.profiles?.last_name}`,
+//       shipment.sender_name,
+//       shipment.from_address,
+//       shipment.to_address,
+//       format(new Date(shipment.created_at), "PPP"),
+//     ]);
+  
+//     // 🏗️ Render Table
+//     doc.autoTable({
+//       startY: yPosition,
+//       head: [tableColumnHeaders],
+//       body: tableRows,
+//       theme: "striped",
+//       headStyles: { fillColor: [22, 38, 74], textColor: [255, 255, 255] },
+//       alternateRowStyles: { fillColor: [240, 240, 240] },
+//       margin: { top: 10 },
+//     });
+  
+//     // ✅ Convert PDF to Blob
+//     const pdfBlob = doc.output("blob");
+
+//     // ✅ Convert Blob to File URL (WebView-Safe)
+//     const file = new File([pdfBlob], `Shipment_Report_${reportDate}.pdf`, { type: "application/pdf" });
+//     const fileURL = URL.createObjectURL(file);
+
+//     // ✅ Create Hidden <a> Tag to Trigger Download
+//     const link = document.createElement("a");
+//     link.href = fileURL;
+//     link.download = `Shipment_Report_${reportDate}.pdf`;
+//     document.body.appendChild(link);
+//     link.click();
+
+//     // ✅ Cleanup
+//     document.body.removeChild(link);
+//     URL.revokeObjectURL(fileURL);
+// };
   
 
   const fetchUsers = useCallback(async () => {
