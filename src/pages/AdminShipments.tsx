@@ -406,17 +406,17 @@ export default function AdminShipments() {
   const downloadPDF = () => {
     const doc = new jsPDF({ orientation: "landscape" });
     const reportDate = format(new Date(), "PPP");
-
+  
     // 📄 HEADER SECTION
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
     doc.text("Shipment Report", 140, 15, { align: "center" });
-
+  
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     doc.text(`Date of Report: ${reportDate}`, 15, 25);
     let yPosition = 35;
-
+  
     // 🎯 FILTERS SECTION
     if (
       startDate ||
@@ -431,10 +431,10 @@ export default function AdminShipments() {
       doc.setFontSize(14);
       doc.text("Applied Filters:", 15, yPosition);
       yPosition += 8;
-
+  
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
-
+  
       if (startDate && endDate) {
         doc.text(`Date Range: ${startDate} → ${endDate}`, 20, yPosition);
         yPosition += 7;
@@ -465,10 +465,10 @@ export default function AdminShipments() {
         doc.text(`To: ${selectedTo}`, 20, yPosition);
         yPosition += 7;
       }
-
+  
       yPosition += 5;
     }
-
+  
     // 📊 TABLE HEADERS
     const tableColumnHeaders = [
       "Package ID",
@@ -486,7 +486,7 @@ export default function AdminShipments() {
       shipment.to_address,
       format(new Date(shipment.created_at), "PPP"),
     ]);
-
+  
     // 🏗️ Render Table
     doc.autoTable({
       startY: yPosition,
@@ -497,24 +497,17 @@ export default function AdminShipments() {
       alternateRowStyles: { fillColor: [240, 240, 240] },
       margin: { top: 10 },
     });
-
-    // Convert PDF to Blob URL
-    const pdfBlob = doc.output("blob");
-    const blobUrl = URL.createObjectURL(pdfBlob);
-
-    // Create an <a> element for download
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = `Shipment_Report_${reportDate}.pdf`;
-
-    // Simulate a click to trigger download
-    document.body.appendChild(link);
-    link.click();
-
-    // Clean up the DOM
-    document.body.removeChild(link);
-    URL.revokeObjectURL(blobUrl);
+  
+    // ✅ Convert PDF to Base64
+    const pdfBase64 = doc.output("dataurlstring");
+  
+    // ✅ Open in a new tab (WebView friendly)
+    const newWindow = window.open();
+    newWindow.document.write(
+      `<iframe width="100%" height="100%" src="${pdfBase64}"></iframe>`
+    );
   };
+  
 
   const fetchUsers = useCallback(async () => {
     try {
