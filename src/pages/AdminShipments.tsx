@@ -305,6 +305,104 @@ export default function AdminShipments() {
   const [gotoPage, setGotoPage] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
+  // const downloadPDF = () => {
+  //   const doc = new jsPDF({ orientation: "landscape" });
+  //   const reportDate = format(new Date(), "PPP");
+
+  //   // 📄 HEADER SECTION
+  //   doc.setFont("helvetica", "bold");
+  //   doc.setFontSize(22);
+  //   doc.text("Shipment Report", 140, 15, { align: "center" });
+
+  //   doc.setFontSize(12);
+  //   doc.setFont("helvetica", "normal");
+  //   doc.text(`Date of Report: ${reportDate}`, 15, 25);
+  //   let yPosition = 35;
+
+  //   // 🎯 FILTERS SECTION
+  //   if (
+  //     startDate ||
+  //     endDate ||
+  //     search ||
+  //     selectedUsers.length ||
+  //     selectedSender ||
+  //     selectedFrom ||
+  //     selectedTo
+  //   ) {
+  //     doc.setFont("helvetica", "bold");
+  //     doc.setFontSize(14);
+  //     doc.text("Applied Filters:", 15, yPosition);
+  //     yPosition += 8;
+
+  //     doc.setFontSize(12);
+  //     doc.setFont("helvetica", "normal");
+
+  //     if (startDate && endDate) {
+  //       doc.text(`Date Range: ${startDate} → ${endDate}`, 20, yPosition);
+  //       yPosition += 7;
+  //     }
+  //     if (search) {
+  //       doc.text(`Search Query: ${search}`, 20, yPosition);
+  //       yPosition += 7;
+  //     }
+  //     if (selectedUsers.length) {
+  //       doc.text(
+  //         `Users: ${selectedUsers
+  //           .map((u) => `${u.first_name} ${u.last_name}`)
+  //           .join(", ")}`,
+  //         20,
+  //         yPosition
+  //       );
+  //       yPosition += 7;
+  //     }
+  //     if (selectedSender) {
+  //       doc.text(`Sender: ${selectedSender}`, 20, yPosition);
+  //       yPosition += 7;
+  //     }
+  //     if (selectedFrom) {
+  //       doc.text(`From: ${selectedFrom}`, 20, yPosition);
+  //       yPosition += 7;
+  //     }
+  //     if (selectedTo) {
+  //       doc.text(`To: ${selectedTo}`, 20, yPosition);
+  //       yPosition += 7;
+  //     }
+
+  //     yPosition += 5;
+  //   }
+
+  //   // 📊 TABLE HEADERS (Image Column Removed)
+  //   const tableColumnHeaders = [
+  //     "Package ID",
+  //     "User",
+  //     "Sender",
+  //     "From",
+  //     "To",
+  //     "Date",
+  //   ];
+  //   const tableRows = shipments.map((shipment) => [
+  //     shipment.package_id,
+  //     `${shipment.profiles?.first_name} ${shipment.profiles?.last_name}`,
+  //     shipment.sender_name,
+  //     shipment.from_address,
+  //     shipment.to_address,
+  //     format(new Date(shipment.created_at), "PPP"),
+  //   ]);
+
+  //   // 🏗️ Render Table
+  //   doc.autoTable({
+  //     startY: yPosition,
+  //     head: [tableColumnHeaders],
+  //     body: tableRows,
+  //     theme: "striped",
+  //     headStyles: { fillColor: [22, 38, 74], textColor: [255, 255, 255] }, // Dark blue header with white text
+  //     alternateRowStyles: { fillColor: [240, 240, 240] },
+  //     margin: { top: 10 },
+  //   });
+
+  //   doc.save(`Shipment_Report_${reportDate}.pdf`);
+  // };
+
   const downloadPDF = () => {
     const doc = new jsPDF({ orientation: "landscape" });
     const reportDate = format(new Date(), "PPP");
@@ -371,7 +469,7 @@ export default function AdminShipments() {
       yPosition += 5;
     }
 
-    // 📊 TABLE HEADERS (Image Column Removed)
+    // 📊 TABLE HEADERS
     const tableColumnHeaders = [
       "Package ID",
       "User",
@@ -395,12 +493,27 @@ export default function AdminShipments() {
       head: [tableColumnHeaders],
       body: tableRows,
       theme: "striped",
-      headStyles: { fillColor: [22, 38, 74], textColor: [255, 255, 255] }, // Dark blue header with white text
+      headStyles: { fillColor: [22, 38, 74], textColor: [255, 255, 255] },
       alternateRowStyles: { fillColor: [240, 240, 240] },
       margin: { top: 10 },
     });
 
-    doc.save(`Shipment_Report_${reportDate}.pdf`);
+    // Convert PDF to Blob URL
+    const pdfBlob = doc.output("blob");
+    const blobUrl = URL.createObjectURL(pdfBlob);
+
+    // Create an <a> element for download
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = `Shipment_Report_${reportDate}.pdf`;
+
+    // Simulate a click to trigger download
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up the DOM
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
   };
 
   const fetchUsers = useCallback(async () => {
@@ -505,12 +618,18 @@ export default function AdminShipments() {
             onChange={(e) => setSearch(e.target.value)}
             className="border p-2 rounded-md w-full sm:w-72"
           />
+          <label className="block text-gray-700 text-sm font-bold mt-3">
+            From Date:
+          </label>
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             className="border p-2 rounded-md w-full sm:w-48"
           />
+          <label className="block text-gray-700 text-sm font-bold mt-3">
+            To Date:
+          </label>
           <input
             type="date"
             value={endDate}
@@ -540,21 +659,21 @@ export default function AdminShipments() {
             placeholder="📨 Sender"
             value={selectedSender}
             onChange={(e) => setSelectedSender(e.target.value)}
-            className="border p-2 rounded-md w-full sm:w-48"
+            className="border p-2 rounded-md w-full sm:w-32"
           />
           <input
             type="text"
             placeholder="📍 From"
             value={selectedFrom}
             onChange={(e) => setSelectedFrom(e.target.value)}
-            className="border p-2 rounded-md w-full sm:w-48"
+            className="border p-2 rounded-md w-full sm:w-20"
           />
           <input
             type="text"
             placeholder="📍 To"
             value={selectedTo}
             onChange={(e) => setSelectedTo(e.target.value)}
-            className="border p-2 rounded-md w-full sm:w-48"
+            className="border p-2 rounded-md w-full sm:w-20"
           />
           <button
             onClick={() => {
@@ -653,7 +772,7 @@ export default function AdminShipments() {
               onChange={(e) => setPageSize(Number(e.target.value))}
               className="border p-2 rounded-md"
             >
-              {[5,10, 50, 500, 5000].map((size) => (
+              {[5, 10, 50, 500, 5000].map((size) => (
                 <option key={size} value={size}>
                   {size} per page
                 </option>
