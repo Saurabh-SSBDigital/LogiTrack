@@ -498,22 +498,24 @@ export default function AdminShipments() {
       margin: { top: 10 },
     });
   
-    // ✅ Convert PDF to Base64
-    const pdfBase64 = doc.output("datauristring");
-  
-    // ✅ Use Android Download Intent
-    const a = document.createElement("a");
-    a.href = pdfBase64;
-    a.download = `Shipment_Report_${reportDate}.pdf`;
-  
-    // Try triggering download natively
-    try {
-      const event = new MouseEvent("click");
-      a.dispatchEvent(event);
-    } catch (e) {
-      window.location.href = pdfBase64; // Fallback for WebView
-    }
-  };
+    // ✅ Convert PDF to Blob
+    const pdfBlob = doc.output("blob");
+
+    // ✅ Convert Blob to File URL (WebView-Safe)
+    const file = new File([pdfBlob], `Shipment_Report_${reportDate}.pdf`, { type: "application/pdf" });
+    const fileURL = URL.createObjectURL(file);
+
+    // ✅ Create Hidden <a> Tag to Trigger Download
+    const link = document.createElement("a");
+    link.href = fileURL;
+    link.download = `Shipment_Report_${reportDate}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+
+    // ✅ Cleanup
+    document.body.removeChild(link);
+    URL.revokeObjectURL(fileURL);
+};
   
 
   const fetchUsers = useCallback(async () => {
