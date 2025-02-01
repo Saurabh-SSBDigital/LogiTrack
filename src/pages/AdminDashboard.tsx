@@ -1,11 +1,20 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { format } from 'date-fns';
-import { Search, Filter, UserCog, Eye, ChevronLeft, ChevronRight, Pencil, XCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import React, { useEffect, useState, useCallback } from "react";
+import { format } from "date-fns";
+import {
+  Search,
+  Filter,
+  UserCog,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+  XCircle,
+} from "lucide-react";
+import { supabase } from "../lib/supabase";
 
 interface User {
   id: string;
-  role: 'admin' | 'user';
+  role: "admin" | "user";
   created_at: string;
   first_name: string;
   last_name: string;
@@ -31,11 +40,11 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [selectedUser, setSelectedUser] = useState<string>('');
-  const [sorting, setSorting] = useState<'asc' | 'desc'>('desc');
+  const [search, setSearch] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [sorting, setSorting] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [editingUser, setEditingUser] = useState<string | null>(null);
@@ -44,14 +53,14 @@ export default function AdminDashboard() {
   const fetchUsers = useCallback(async () => {
     try {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('id, role, created_at, first_name, last_name')
-        .order('created_at', { ascending: false });
+        .from("profiles")
+        .select("user_id, role, created_at, first_name, last_name")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setUsers(data || []);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching users:", error);
     }
   }, []);
 
@@ -61,24 +70,31 @@ export default function AdminDashboard() {
 
     try {
       let query = supabase
-        .from('shipments')
-        .select(`
+        .from("shipments")
+        .select(
+          `
           *,
           profiles(id, first_name, last_name)
-        `, { count: 'exact' })
-        .order('created_at', { ascending: sorting === 'asc' })
+        `,
+          { count: "exact" }
+        )
+        .order("created_at", { ascending: sorting === "asc" })
         .range((page - 1) * pageSize, page * pageSize - 1);
 
       if (search) {
-        query = query.or(`package_id.ilike.%${search}%,sender_name.ilike.%${search}%`);
+        query = query.or(
+          `package_id.ilike.%${search}%,sender_name.ilike.%${search}%`
+        );
       }
 
       if (startDate && endDate) {
-        query = query.gte('created_at', `${startDate}T00:00:00`).lte('created_at', `${endDate}T23:59:59`);
+        query = query
+          .gte("created_at", `${startDate}T00:00:00`)
+          .lte("created_at", `${endDate}T23:59:59`);
       }
 
       if (selectedUser) {
-        query = query.eq('user_id', selectedUser);
+        query = query.eq("user_id", selectedUser);
       }
 
       const { data, count, error } = await query;
@@ -87,22 +103,27 @@ export default function AdminDashboard() {
       setShipments(data || []);
       setTotalPages(Math.ceil((count || 0) / pageSize));
     } catch (error) {
-      console.error('Error fetching shipments:', error);
+      console.error("Error fetching shipments:", error);
     } finally {
       setLoading(false);
     }
   }, [search, startDate, endDate, selectedUser, sorting, page]);
 
   const updateUserRole = async (userId: string, newRole: string) => {
-    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+    );
 
     try {
-      const { error } = await supabase.from('profiles').update({ role: newRole }).eq('id', userId);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ role: newRole })
+        .eq("user_id", userId);
       if (error) throw error;
 
       setEditingUser(null);
     } catch (error) {
-      console.error('Error updating user role:', error);
+      console.error("Error updating user role:", error);
     }
   };
 
@@ -141,7 +162,9 @@ export default function AdminDashboard() {
                     {editingUser === user.id ? (
                       <select
                         value={user.role}
-                        onChange={(e) => updateUserRole(user.id, e.target.value)}
+                        onChange={(e) =>
+                          updateUserRole(user.id, e.target.value)
+                        }
                         className="border rounded-md p-1"
                       >
                         <option value="user">User</option>
@@ -151,10 +174,20 @@ export default function AdminDashboard() {
                       <span>{user.role}</span>
                     )}
                   </td>
-                  <td className="p-3">{format(new Date(user.created_at), 'MMM d, yyyy')}</td>
                   <td className="p-3">
-                    <button onClick={() => setEditingUser(editingUser === user.id ? null : user.id)}>
-                      {editingUser === user.id ? 'Save' : <Pencil className="h-5 w-5" />}
+                    {format(new Date(user.created_at), "MMM d, yyyy")}
+                  </td>
+                  <td className="p-3">
+                    <button
+                      onClick={() =>
+                        setEditingUser(editingUser === user.id ? null : user.id)
+                      }
+                    >
+                      {editingUser === user.id ? (
+                        "Save"
+                      ) : (
+                        <Pencil className="h-5 w-5" />
+                      )}
                     </button>
                   </td>
                 </tr>
@@ -192,8 +225,18 @@ export default function AdminDashboard() {
                     <td className="p-3">{shipment.sender_name}</td>
                     <td className="p-3">{shipment.from_address}</td>
                     <td className="p-3">{shipment.to_address}</td>
-                    <td className="p-3">{format(new Date(shipment.created_at), 'MMM d, yyyy')}</td>
-                    <td className="p-3">{shipment.image_url && <img src={shipment.image_url} alt="Shipment" className="h-12 w-12 rounded cursor-pointer" />}</td>
+                    <td className="p-3">
+                      {format(new Date(shipment.created_at), "MMM d, yyyy")}
+                    </td>
+                    <td className="p-3">
+                      {shipment.image_url && (
+                        <img
+                          src={shipment.image_url}
+                          alt="Shipment"
+                          className="h-12 w-12 rounded cursor-pointer"
+                        />
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

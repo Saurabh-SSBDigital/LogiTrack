@@ -32,7 +32,7 @@ export default function AdminUsers() {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, role, created_at, first_name, last_name")
+        .select("user_id, role, created_at, first_name, last_name")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -52,7 +52,7 @@ export default function AdminUsers() {
       const { error } = await supabase
         .from("profiles")
         .update({ role: newRole })
-        .eq("id", userId);
+        .eq("user_id", userId);
       if (error) throw error;
       setEditingUser(null);
     } catch (error) {
@@ -97,7 +97,7 @@ export default function AdminUsers() {
         .from("profiles")
         .insert([
           {
-            id: authData.user?.id,
+            user_id: authData.user?.id,
             first_name: newUser.first_name,
             last_name: newUser.last_name,
             role: newUser.role,

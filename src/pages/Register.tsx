@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { Package } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Package } from "lucide-react";
+import { supabase } from "../lib/supabase";
 
 export default function Register() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
-    setSuccessMessage('');
+    setSuccessMessage("");
 
     try {
       // Step 1: Register user with Supabase Auth
@@ -27,22 +27,22 @@ export default function Register() {
       if (signUpError) throw signUpError;
 
       const user = data.user;
-      if (!user) throw new Error('Registration failed. Please try again.');
+      if (!user) throw new Error("Registration failed. Please try again.");
 
       // Step 2: Add user to the profiles table with role = 'user'
       const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([{ id: user.id, email, role: 'user' }]);
+        .from("profiles")
+        .insert([{ user_id: user.id, email, role: "user" }]);
 
       if (profileError) throw profileError;
 
       // Step 3: Display email verification message
       setSuccessMessage(
-        'Account created successfully! Please check your email for a verification link before logging in.'
+        "Account created successfully! Please check your email for a verification link before logging in."
       );
 
       // Step 4: Redirect to login page after short delay
-      setTimeout(() => navigate('/login'), 4000);
+      setTimeout(() => navigate("/login"), 4000);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -77,7 +77,10 @@ export default function Register() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Email address
               </label>
               <input
@@ -91,7 +94,10 @@ export default function Register() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Password
               </label>
               <input
@@ -110,7 +116,7 @@ export default function Register() {
                 disabled={loading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
               >
-                {loading ? 'Creating account...' : 'Create account'}
+                {loading ? "Creating account..." : "Create account"}
               </button>
             </div>
           </form>

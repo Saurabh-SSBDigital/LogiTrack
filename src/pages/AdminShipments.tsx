@@ -161,13 +161,12 @@ export default function AdminShipments() {
 
     doc.save(`Shipment_Report_${reportDate}.pdf`);
   };
-  
 
   const fetchUsers = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name");
+        .select("user_id, first_name, last_name");
       if (error) throw error;
       setUsers(data || []);
     } catch (error) {
@@ -184,7 +183,7 @@ export default function AdminShipments() {
         .select(
           `
           *,
-          profiles(id, first_name, last_name)
+          profiles(user_id, first_name, last_name)
         `,
           { count: "exact" }
         )

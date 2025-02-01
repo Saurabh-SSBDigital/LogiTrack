@@ -32,7 +32,7 @@ export default function Login() {
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
-        .eq("id", user.id)
+        .eq("user_id", user.id)
         .single();
 
       if (profileError) throw new Error("User profile not found");
