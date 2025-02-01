@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-
 import logo from "../assets/logo.png";
 
 export default function Login() {
@@ -32,7 +31,7 @@ export default function Login() {
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("role")
-        .eq("user_id", user.id)
+        .eq("id", user.id)
         .single();
 
       if (profileError) throw new Error("User profile not found");
@@ -51,51 +50,59 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 p-4 ">
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <div className="sm:mx-auto sm:w-full sm:max-w-md mb-10">
-            <div className="flex justify-center">
-              <img src={logo} className="h-12 w-12 text-indigo-600" />
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg">
+        <div className="flex flex-col items-center mb-6">
+          <img src={logo} alt="Logo" className="h-16 w-16 mb-4" />
+          <h2 className="text-3xl font-bold text-gray-800">SSBI LogiTrack</h2>
+        </div>
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 border border-red-300 text-red-600 px-4 py-3 rounded">
+              {error}
             </div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              SSBI LogiTrack
-            </h2>
-          </div>
-
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-                {error}
-              </div>
-            )}
+          )}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
             <input
               id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              className="w-full px-3 py-2 border rounded"
+              placeholder="you@example.com"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-150"
             />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
             <input
               id="password"
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full px-3 py-2 border rounded"
+              placeholder="********"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition duration-150"
             />
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-indigo-600 text-white py-2 rounded"
-            >
-              {loading ? "Signing in..." : "Sign in"}
-            </button>
-          </form>
-        </div>
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gray-800 text-white py-2 rounded-md hover:bg-gray-700 transition duration-150 disabled:opacity-50"
+          >
+            {loading ? "Signing in..." : "Sign in"}
+          </button>
+          <div className="text-center">
+            <a href="/forgot-password" className="text-sm text-gray-800 hover:underline">
+              Forgot your password?
+            </a>
+          </div>
+        </form>
       </div>
     </div>
   );
